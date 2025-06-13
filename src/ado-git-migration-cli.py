@@ -6,8 +6,11 @@ Requirements:
 - Azure DevOps CLI (az devops) installed and configured
 - Git installed and configured
 
+Run:
+This is expected to be run in an Ubuntu evironment (such as with ubuntu-latest in Azure DevOps pipelines)
+
 Usage:
-    python ado-git-migration-cli.py --org-url https://dev.azure.com/org \
+    python src/ado-git-migration-cli.py --org-url https://dev.azure.com/org \
         --project myproject \
         --prod-repo prod-repo-name \
         --non-prod-repo non-prod-repo-name \
@@ -26,7 +29,7 @@ Arguments:
     --dev-branch: Branch name to use in the merged repo for non-prod history (default: develop)
 
 Test:
-    python ado-git-migration-cli.py \
+    python3 src/ado-git-migration-cli.py \
     --org-url https://dev.azure.com/Contoso-University \
     --project Fabric \
     --prod-repo test-migration-prod \
@@ -86,7 +89,7 @@ def main() -> None:
 
     # az repos create fails if the repo already exists
     try:
-        run(['az', 'repos', 'create', '--name', args.target, '--open'])
+        run(['az', 'repos', 'create', '--name', args.target, '--open'], os.getcwd())
     except subprocess.CalledProcessError as exc:
         logging.warning(f'Repository {args.target} already exists, skipping creation', args.target, exc.returncode)
 
