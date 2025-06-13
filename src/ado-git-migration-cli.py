@@ -43,19 +43,15 @@ import argparse
 import logging
 import os
 import subprocess
-import shutil
 import sys
 import tempfile
 from pathlib import Path
 from typing import List
 
-def run(cmd: List[str], cwd:str | Path | None) -> None:
-    """
-    Run a shell command, streaming stdout/stderr.
-    Raises subprocess.CalledProcessError on non-zero exit
-    """
-    logging.debug(f'Running: {cmd} (cwd={os.getcwd()})')
-    completed = subprocess.run(cmd, cwd=os.getcwd(), check=False)
+def run(cmd: List[str], cwd: str | Path | None = None) -> None:
+    """Run a shell command and raise on failure."""
+    logging.debug(f'Running: {cmd} (cwd={cwd})')
+    completed = subprocess.run(cmd, cwd=cwd, check=False)
     if completed.returncode != 0:
         raise subprocess.CalledProcessError(
             completed.returncode, cmd, output=None, stderr=None)
@@ -83,28 +79,52 @@ def main() -> None:
     )
 
     logging.info('Starting Azure DevOps defaults')
-    run(['az', 'devops', 'configure', '--defaults', f'organization={args.org_url}', f'project={args.project}'], None)
+    run(
+        [
+            'az',
+            'devops',
+            'configure',
+            '--defaults',
+            f'organization={args.org_url}',
+            f'project={args.project}',
+        ]
+    )
+
+    prod_url = f"{args.org_url}/{args.project}/_git/{args.prod_repo}"
+    nonprod_url = f"{args.org_url}/{args.project}/_git/{args.non_prod_repo}"
+    target_url = f"{args.org_url}/{args.project}/_git/{args.target}"
 
     logging.info(f'Creating empty repository {args.target}')
 
     # az repos create fails if the repo already exists
     try:
-        run(['az', 'repos', 'create', '--name', args.target, '--open'], os.getcwd())
-    except subprocess.CalledProcessError as exc:
-        logging.warning(f'Repository {args.target} already exists, skipping creation', args.target, exc.returncode)
+        run(['az', 'repos', 'create', '--name', args.target, '--open'])
+    except subprocess.CalledProcessError:
+        logging.warning('Repository %s already exists, skipping creation', args.target)
 
     logging.info(f'Importing prod history into {args.target}')
-    run(['az', 'repos', 'import', 'create', '--git-source-url', args.prod_url, '--repository', args.target])
+    run(
+        [
+            'az',
+            'repos',
+            'import',
+            'create',
+            '--git-source-url',
+            prod_url,
+            '--repository',
+            args.target,
+        ]
+    )
 
     logging.info('Cloning target report and bringing in non-prod history')
     with tempfile.TemporaryDirectory() as tempdir:
         tempdir = Path(tempdir)
         target_clone_path = Path(tempdir) / 'merged'
-        run(['git', 'clone', f'{args.org_url}/{args.project}/_git/{args.target}', str(target_clone_path)])
+        run(['git', 'clone', target_url, str(target_clone_path)])
 
         # add non-prod remote and fetch
-        run(['git', 'remote', 'add', 'nonprod', args.nonprod_url], cws=target_clone_path)
-        run(['git', 'fetch' 'nonprod'], cwd=target_clone_path)
+        run(['git', 'remote', 'add', 'nonprod', nonprod_url], cwd=target_clone_path)
+        run(['git', 'fetch', 'nonprod'], cwd=target_clone_path)
 
         # create develop branch from non-prod default branch
         run(['git', 'checkout', '-b', args.dev_branch, f'nonprod/{args.nonprod_branch}'], cwd=target_clone_path)
@@ -116,8 +136,7 @@ def main() -> None:
 
         logging.info(f'Migration finished.  Repo {args.target} now has\n'
                      f'main -> prod history\n'
-                     f'args.dev_branch -> non-prod history'
-                     )
+                     f'{args.dev_branch} -> non-prod history')
         
 if __name__ == '__main__':
     try:
