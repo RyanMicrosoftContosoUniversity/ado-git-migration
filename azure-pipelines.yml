@@ -1,0 +1,42 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  orgUrl: ''
+  project: ''
+  prodRepo: ''
+  nonProdRepo: ''
+  targetRepo: ''
+  nonProdBranch: 'main'
+  devBranch: 'develop'
+  extraArgs: ''
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.9'
+
+- script: python -m pip install --upgrade pip
+  displayName: 'Upgrade pip'
+
+- script: pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    python src/ado-git-migration-cli.py \
+      --org-url $(orgUrl) \
+      --project $(project) \
+      --prod-repo $(prodRepo) \
+      --non-prod-repo $(nonProdRepo) \
+      --target $(targetRepo) \
+      --nonprod-branch $(nonProdBranch) \
+      --dev-branch $(devBranch) \
+      $(extraArgs)
+  displayName: 'Run migration script'
+  env:
+    AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
+    AZURE_DEVOPS_USERNAME: $(AZURE_DEVOPS_USERNAME)
+
