@@ -1,0 +1,68 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+  - name: org_url
+    type: string
+    default: 'https://dev.azure.com/Contoso-University'
+    displayName: 'Organization URL'
+  - name: project
+    type: string
+    default: 'Fabric'
+    displayName: 'Project Name'
+  - name: prod_repo
+    type: string
+    default: 'test-migration-prod'
+    displayName: 'Prod Repo'
+  - name: non_prod_repo
+    type: string
+    default: 'test-migration-non-prod'
+    displayName: 'Non-Prod repo'
+  - name: target
+    type: string
+    default: 'test-consolidated-migration-repo'
+    displayName: 'Name of the new consolidated repository to be created'
+  - name: nonprod_branch
+    type: string
+    default: 'main'
+    displayName: 'Default branch name in the non-prod repo'
+  - name: dev_branch
+    type: string
+    default: 'develop'
+    displayName: 'Branch name to use in the merged repo for non-prod history'
+
+steps:
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.11'
+
+- script: python -m pip install --upgrade pip
+  displayName: 'Upgrade pip'
+
+- script: pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    echo $(AZURE_DEVOPS_PAT) | az devops login
+  displayName: 'Azure DevOps CLI Login'
+  env:
+    AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
+
+- script: |
+    python src/ado-git-migration-cli.py \
+      --org-url ${{parameters.org_url}} \
+      --project ${{parameters.project}} \
+      --prod-repo ${{parameters.prod_repo}} \
+      --non-prod-repo ${{parameters.non_prod_repo}} \
+      --target ${{parameters.target}} \
+      --nonprod-branch ${{parameters.nonprod_branch}} \
+      --dev-branch ${{parameters.dev_branch}} \
+      --pat "$AZURE_DEVOPS_PAT"
+  displayName: 'Run migration script'
+  env:
+    AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
+
