@@ -55,7 +55,6 @@ steps:
       --nonprod-branch ${{parameters.nonprod_branch}} \
       --dev-branch ${{parameters.dev_branch}} \
       --pat "$AZURE_DEVOPS_PAT"
-      --verbose
   displayName: 'Run migration script'
   env:
     AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
