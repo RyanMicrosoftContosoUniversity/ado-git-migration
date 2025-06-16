@@ -4,15 +4,32 @@ pr: none
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  orgUrl: ''
-  project: ''
-  prodRepo: ''
-  nonProdRepo: ''
-  targetRepo: ''
-  nonProdBranch: 'main'
-  devBranch: 'develop'
-  extraArgs: ''
+parameters:
+  - name: orgUrl
+    type: string
+    default: ''
+    displayName: 'Organization URL'
+  - name: project
+    type: string
+    default: ''
+    displayName: 'Project Name'
+  - name: prodRepo
+    type: string
+    default: ''
+    displayName: 'Production Repo'
+  - name: nonProdRepo
+    type: string
+    default: ''
+    displayName: 'Non-Prod repo'
+  - name: devBranch
+    type: string
+    default: 'develop'
+    displayName: 'Dev Branch'
+  - name: extraArgs
+    type: string
+    default: ''
+    displayName: 'Additional CLI Arguments'
+  
 
 steps:
 - task: UsePythonVersion@0
