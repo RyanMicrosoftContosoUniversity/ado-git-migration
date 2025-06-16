@@ -16,7 +16,7 @@ parameters:
   - name: prodRepo
     type: string
     default: ''
-    displayName: 'Production Repo'
+    displayName: 'Prod Repo'
   - name: nonProdRepo
     type: string
     default: ''
