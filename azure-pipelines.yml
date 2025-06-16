@@ -33,10 +33,6 @@ parameters:
     type: string
     default: 'develop'
     displayName: 'Branch name to use in the merged repo for non-prod history'
-  - name: extra_args
-    type: string
-    default: ''
-    displayName: 'Extra arguments, such as -v, as required'
 
 steps:
 - task: UsePythonVersion@0
@@ -59,7 +55,7 @@ steps:
       --nonprod-branch ${{parameters.nonprod_branch}} \
       --dev-branch ${{parameters.dev_branch}} \
       --pat "$AZURE_DEVOPS_PAT"
-      $(extra-args)
+      --verbose
   displayName: 'Run migration script'
   env:
     AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
