@@ -7,23 +7,23 @@ pool:
 parameters:
   - name: org_url
     type: string
-    default: ''
+    default: 'https://dev.azure.com/Contoso-University'
     displayName: 'Organization URL'
   - name: project
     type: string
-    default: ''
+    default: 'Fabric'
     displayName: 'Project Name'
   - name: prod_repo
     type: string
-    default: ''
+    default: 'test-migration-prod'
     displayName: 'Prod Repo'
   - name: non_prod_repo
     type: string
-    default: ''
+    default: 'test-migration-non-prod'
     displayName: 'Non-Prod repo'
   - name: target
     type: string
-    default: ''
+    default: 'test-consolidated-migration-repo'
     displayName: 'Name of the new consolidated repository to be created'
   - name: nonprod_branch
     type: string
