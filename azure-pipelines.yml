@@ -35,6 +35,7 @@ parameters:
     displayName: 'Branch name to use in the merged repo for non-prod history'
 
 steps:
+
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.11'
@@ -44,6 +45,12 @@ steps:
 
 - script: pip install -r requirements.txt
   displayName: 'Install dependencies'
+
+- script: |
+    echo $(AZURE_DEVOPS_PAT) | az devops login
+  displayName: 'Azure DevOps CLI Login'
+  env:
+    AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
 
 - script: |
     python src/ado-git-migration-cli.py \
