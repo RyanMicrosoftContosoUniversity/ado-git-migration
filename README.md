@@ -16,7 +16,7 @@ This tool automates the process of combining two separate Git repositories in Az
 
 ## Requirements
 
-- Python 3.8 or higher
+- Python 3.11 or higher
 - Azure DevOps CLI extension (`az devops`) installed and configured
 - Git installed and configured
 - Access permissions to create repositories and import code in your Azure DevOps project
@@ -33,6 +33,19 @@ This tool automates the process of combining two separate Git repositories in Az
    ```bash
    pip install -r requirements.txt
    ```
+
+3. Retrieve PAT Token
+    1. Naviagate to your organization's Azure DevOps Landing Page (https://dev.azure.com/<your-org>/<your-project>)
+    2. Select User Settings <br>
+        ![Select User Settings](docs/select-user-settings.png)<br>
+    3. Select Personal access tokens <br>
+        ![Select PAT Tokens](docs/select-pat-tokens.png)<br>
+    4. Create New Token<br>
+        ![Create New Token](docs/create-new-token.png)<br>
+    5. Create Token<br>
+        ![Create Token](docs/create-token.png)<br>
+    6. Be sure to securely store the token either in an Azure Key Vault or Secure Pipeline Variable
+    
 
 ## Usage
 
